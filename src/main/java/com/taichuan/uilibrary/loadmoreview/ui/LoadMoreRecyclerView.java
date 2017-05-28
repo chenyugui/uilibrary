@@ -96,7 +96,7 @@ public class LoadMoreRecyclerView extends RecyclerView implements LoadMoreBaseVi
             setAdapter(adapter);
         } else {
             try {
-                throw new Exception("please use LoadMoreBaseAdapter");
+                throw new Exception("please use LoadMoreRecycleAdapter");
             } catch (Exception e) {
                 e.printStackTrace();
             }

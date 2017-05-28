@@ -16,12 +16,12 @@ import java.lang.ref.WeakReference;
 
 /**
  * 包含"加载更多"的ListView控件。
- * 只能使用LoadMoreBaseAdapter或其子类
+ * Adapter只能使用CommonAdapter或其子类
  */
 public class LoadMoreListView extends ListView implements LoadMoreBaseView {
     private static final String TAG = "LoadMoreListView";
     public ListScrollListener listScrollListener;
-    private LoadMoreBaseAdapter loadMoreBaseAdapter;
+    private CommonAdapter commonAdapter;
     private boolean isLoading;
     private static MyHandler handler;
 
@@ -87,36 +87,36 @@ public class LoadMoreListView extends ListView implements LoadMoreBaseView {
 
     @Override
     public void setAdapter(ListAdapter adapter) {
-        if (adapter instanceof LoadMoreBaseAdapter) {
-            setAdapter(loadMoreBaseAdapter);
+        if (adapter instanceof CommonAdapter) {
+            setAdapter(commonAdapter);
         } else {
             try {
-                throw new Exception("please use LoadMoreBaseAdapter");
+                throw new Exception("please use CommonAdapter");
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public void setAdapter(LoadMoreBaseAdapter adapter) {
-        this.loadMoreBaseAdapter = adapter;
-        super.setAdapter(loadMoreBaseAdapter);
+    public void setAdapter(CommonAdapter adapter) {
+        this.commonAdapter = adapter;
+        super.setAdapter(commonAdapter);
     }
 
     @Override
     public boolean isShowFooter() {
-        return loadMoreBaseAdapter.isCanLoadMore();
+        return commonAdapter.isCanLoadMore();
     }
 
     /**
      * 设置能不能加载更多
      */
     public void setIsCanLoadMore(boolean isCanLoadMore) {
-        if (loadMoreBaseAdapter != null) {
-            loadMoreBaseAdapter.setIsShowFooter(isCanLoadMore);
+        if (commonAdapter != null) {
+            commonAdapter.setIsShowFooter(isCanLoadMore);
         } else {
             try {
-                throw new Exception("loadMoreBaseAdapter is null");
+                throw new Exception("CommonAdapter is null");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -127,7 +127,7 @@ public class LoadMoreListView extends ListView implements LoadMoreBaseView {
      * 加载结束
      */
     public void loadMoreFinish(boolean isCanLoadMore) {
-        loadMoreBaseAdapter.setIsShowFooter(false);
+        commonAdapter.setIsShowFooter(false);
         if (isCanLoadMore) {
             Message msg = handler.obtainMessage();
             isLoading = false;
@@ -161,7 +161,7 @@ public class LoadMoreListView extends ListView implements LoadMoreBaseView {
     }
 
 
-    public LoadMoreBaseAdapter getAdapter() {
-        return loadMoreBaseAdapter;
+    public CommonAdapter getAdapter() {
+        return commonAdapter;
     }
 }

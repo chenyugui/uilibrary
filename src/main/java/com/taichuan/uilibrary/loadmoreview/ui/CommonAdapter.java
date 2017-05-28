@@ -14,13 +14,12 @@ import com.taichuan.uilibrary.loadmoreview.viewholder.SuperViewHolder;
 import java.util.List;
 
 /**
- * œ
  * 集成"加载更多"和多种ItemType的BaseAdapter
  *
  * @param <T> 继承于ItemBean的Bean类，拥有itemType属性
  */
-public abstract class LoadMoreBaseAdapter<T extends ItemBean> extends BaseAdapter {
-    private static final String TAG = "LoadMoreBaseAdapter";
+public abstract class CommonAdapter<T extends ItemBean> extends BaseAdapter {
+    private static final String TAG = "CommonAdapter";
     /**
      * 实际数据Bean集合（Bean要继承于ItemBean）
      */
@@ -49,10 +48,10 @@ public abstract class LoadMoreBaseAdapter<T extends ItemBean> extends BaseAdapte
 
     /**
      * @param datas         数据
-     * @param isCanLoadMore 是否能加载更多
-     * @param itemLayoutID      各种类型item的layoutID，支持多种类型
+     * @param isCanLoadMore 是否能加载更多（为true时，需要配合LoadMoreListView使用，普通的ListView无效）
+     * @param itemLayoutID  各种类型item的layoutID数组，支持多种类型。（从0开始计算，第一个代表itemType为0的itemLayoutID，第二个代表itemType为1的itemLayoutID，依此类推 ）
      */
-    public LoadMoreBaseAdapter(List<T> datas, boolean isCanLoadMore, Integer... itemLayoutID) {
+    public CommonAdapter(List<T> datas, boolean isCanLoadMore, Integer... itemLayoutID) {
         init(datas, isCanLoadMore, itemLayoutID);
     }
 
