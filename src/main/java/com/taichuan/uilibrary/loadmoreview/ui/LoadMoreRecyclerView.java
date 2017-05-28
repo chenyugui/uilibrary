@@ -17,6 +17,7 @@ import java.lang.ref.WeakReference;
 /**
  * Created by gui on 2017/3/20.
  * 集成"加载更多"的RecyclerView
+ *
  */
 public class LoadMoreRecyclerView extends RecyclerView implements LoadMoreBaseView {
     private RecyclerScrollListener recyclerScrollListener;
