@@ -42,7 +42,7 @@ uilibrary
 ```
 setOnScrollListener(ListScrollListener listScrollListener)
 ``` 
-&emsp;&emsp;&emsp;使用示例：
+&emsp;&emsp;使用示例：
 ```
         loadMoreListView = findView(R.id.lv);
         loadMoreDataFromServer();
