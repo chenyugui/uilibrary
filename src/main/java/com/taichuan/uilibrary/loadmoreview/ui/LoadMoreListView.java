@@ -20,6 +20,7 @@ import java.lang.ref.WeakReference;
  */
 public class LoadMoreListView extends ListView implements LoadMoreBaseView {
     private static final String TAG = "LoadMoreListView";
+    private LoadMoreListener loadMoreListener;
     public ListScrollListener listScrollListener;
     private CommonAdapter commonAdapter;
     private boolean isLoading;
@@ -77,12 +78,17 @@ public class LoadMoreListView extends ListView implements LoadMoreBaseView {
     }
 
     public void setOnScrollListener(ListScrollListener listScrollListener) {
+        if (listScrollListener.getLoadMoreListener() == null) {
+            listScrollListener.setLoadMoreListener(loadMoreListener);
+        }
+        this.listScrollListener = listScrollListener;
         super.setOnScrollListener(listScrollListener);
     }
 
     public void setLoadMoreListener(LoadMoreListener loadMoreListener) {
+        this.loadMoreListener = loadMoreListener;
         initScrollListener();
-        listScrollListener.setLoadMoreListener(loadMoreListener);
+        listScrollListener.setLoadMoreListener(this.loadMoreListener);
     }
 
     @Override

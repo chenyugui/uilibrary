@@ -52,4 +52,8 @@ public class ListScrollListener implements AbsListView.OnScrollListener {
     public void setLoadMoreListener(LoadMoreListener loadMoreListener) {
         this.loadMoreListener = loadMoreListener;
     }
+
+    public LoadMoreListener getLoadMoreListener() {
+        return loadMoreListener;
+    }
 }
