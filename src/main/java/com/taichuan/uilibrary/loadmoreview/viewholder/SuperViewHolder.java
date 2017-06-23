@@ -35,6 +35,26 @@ public class SuperViewHolder {
         }
     }
 
+    /**
+     * 设置文字颜色
+     */
+    public void setTextColor(int viewID, int color) {
+        View view = null;
+        if (cacheViews.get(viewID) == null) {
+            view = mCoverView.findViewById(viewID);
+            cacheViews.put(viewID, view);
+        } else {
+            view = cacheViews.get(viewID);
+        }
+        if (view instanceof Button) {
+            ((Button) view).setTextColor(color);
+        } else if (view instanceof TextView) {
+            ((TextView) view).setTextColor(color);
+        } else {
+            Log.e(TAG, "view type err");
+        }
+    }
+
     public void setVisibility(int viewID, int visibility) {
         View view;
         if (cacheViews.get(viewID) == null) {
