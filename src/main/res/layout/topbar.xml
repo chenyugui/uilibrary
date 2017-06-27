@@ -2,8 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tool="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="horizontal">
+    android:layout_height="match_parent">
 
     <RelativeLayout
         android:id="@+id/rlt_left"
@@ -29,10 +28,10 @@
 
     <RelativeLayout
         android:id="@+id/rlt_right"
-        android:onClick="onXmlClick"
         android:layout_width="90px"
         android:layout_height="match_parent"
-        android:layout_alignParentRight="true">
+        android:layout_alignParentRight="true"
+        android:onClick="onXmlClick">
 
         <ImageView
             android:id="@+id/img_right"
