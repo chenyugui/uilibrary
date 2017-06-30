@@ -67,7 +67,7 @@ public class PieChartView extends ViewGroup {
         mCircleView.setColors(colors);
     }
 
-    public static final int marginBetween = 100;
+    public static final int marginBetween = 0;
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
@@ -93,13 +93,8 @@ public class PieChartView extends ViewGroup {
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        Log.d("TAGTAG", "onMeasure");
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
-        int viewWidth = MeasureSpec.getSize(widthMeasureSpec);//
-        int viewHeight = MeasureSpec.getSize(heightMeasureSpec);
-        int viewWidthMode = MeasureSpec.getMode(widthMeasureSpec);
-        int viewHeightMode = MeasureSpec.getMode(heightMeasureSpec);
+        Log.d("TAGTAG", "onMeasure");
         for (int i = 0; i < getChildCount(); i++) {
             getChildAt(i).measure(widthMeasureSpec, heightMeasureSpec);
         }

@@ -2,4 +2,5 @@
 <resources>
     <dimen name="titleTextSize">6sp</dimen>
     <dimen name="textSize_noSetPieData">18sp</dimen>
+    <dimen name="textSize_pieDataName">14sp</dimen>
 </resources>

@@ -57,7 +57,9 @@ public class LabelView extends RelativeLayout {
 //        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         int labelHeight = 0;
         if (isShowLabel && mPieDataList != null) {
-            labelHeight = mPieDataList.size() * 50;
+            //TODO
+//            labelHeight = mPieDataList.size() * 50;
+            labelHeight = 0;
         }
         setMeasuredDimension(widthMeasureSpec, labelHeight);
     }
