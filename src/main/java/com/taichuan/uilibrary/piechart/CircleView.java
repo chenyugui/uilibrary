@@ -8,6 +8,7 @@ import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -21,25 +22,27 @@ import java.util.List;
 
 /**
  * Created by gui on 2017/6/29.
- * 扇形组合视图
+ * 扇形组合视图，包含每个扇形、斜线、直线、文字
  */
 public class CircleView extends View {
     private static final String TAG = "CircleView";
     private Paint mPaint;
     private Rect mBounds;
     private CirclePoint mCircle;
+    private PieChartView.OnSelectedListener mOnSelectedListener;
     private int gradient;// 半径梯度
-    /**
-     * 圆形最大半径
-     */
-    private int mCircleViewRadius;
     private List<PieData> mPieDataList;
     /**
-     * 保存横线字体位置的集合
+     * 存储修改后的角度集合
      */
-    private List<List<Integer>> listTextPosition = new ArrayList<>();
+    private List<Float> mAngleList = new ArrayList<>();
+    /**
+     * 保存横线字体位置的集合,下标0、1、2、3分别对应 lX、 rX 、 tY、 bY
+     */
+    private List<List<Float>> listTextPosition = new ArrayList<>();
 
-    private int[] mColors;
+    private List<Integer> mColors;
+    private Integer descriptionTextColor;
     /**
      * 是否显示标签
      */
@@ -48,8 +51,14 @@ public class CircleView extends View {
      * 最小的半径
      */
     private int minRadius;
-    //TODO
-    private int circleMargin = 400;
+    private float circleMargin;
+    private float pieDataTextSize;
+    private float centerTextSize;
+    private float descriptionTextSize;
+    /**
+     * 描述信息
+     */
+    private String descriptionText;
 
 
     public CircleView(Context context) {
@@ -73,13 +82,18 @@ public class CircleView extends View {
     private int touchPosition;
 
     private void init() {
+        circleMargin = getResources().getDimension(R.dimen.margin_pieChartNormal);
+        pieDataTextSize = getResources().getDimension(R.dimen.textSize_pieData);
+        centerTextSize = getResources().getDimension(R.dimen.textSize_pieChartCenterText);
+        descriptionTextSize = getResources().getDimension(R.dimen.textSize_description);
+        descriptionTextColor = getResources().getColor(R.color.textColor_description);
+
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
         mPaint.setDither(true);
         mPaint.setStyle(Paint.Style.FILL);
 
         mCircle = new CirclePoint();
-        setBackgroundColor(Color.BLUE);
         setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -94,10 +108,15 @@ public class CircleView extends View {
                                 // 判断点的是哪个扇形
                                 touchPosition = getTouchSectorPosition(angle);
                                 return true;
-                            } else if (checkIsTouchText(downX, downY) != -1) {// 判断点击是否是横线字体
-
-                            } else {
-                                return false;
+                            } else {// 判断点击的是否是横线字体
+                                int index = checkIsTouchText(downX, downY);
+                                if (index != -1) {
+                                    touchPosition = index;
+                                    return true;
+                                } else {
+                                    // 没有触摸圆形也没有触摸文字
+                                    return false;
+                                }
                             }
                         }
                         break;
@@ -106,7 +125,9 @@ public class CircleView extends View {
                             if (event.getX() == downX && event.getY() == downY) {
                                 if (touchPosition != -1) {
                                     // 处理点击扇形事件
-
+                                    if (mOnSelectedListener != null) {
+                                        mOnSelectedListener.onSelected(mPieDataList.get(touchPosition));
+                                    }
                                 }
                             }
                         }
@@ -119,14 +140,16 @@ public class CircleView extends View {
 
     /**
      * 判断触摸的是否是横线字体
+     *
+     * @return 触摸的文字的索引，-1表示没有触摸文字
      */
     private int checkIsTouchText(float touchX, float touchY) {
         for (int i = 0; i < listTextPosition.size(); i++) {
 
-            int lX = listTextPosition.get(i).get(0);
-            int rX = listTextPosition.get(i).get(1);
-            int tY = listTextPosition.get(i).get(2);
-            int bY = listTextPosition.get(i).get(3);
+            float lX = listTextPosition.get(i).get(0);
+            float rX = listTextPosition.get(i).get(1);
+            float tY = listTextPosition.get(i).get(2);
+            float bY = listTextPosition.get(i).get(3);
             if (touchX >= lX && touchX <= rX && touchY >= tY && touchY <= bY) {
                 Log.d(TAG, "checkIsTouchText: 触摸了文字:" + i);
                 return i;
@@ -179,11 +202,11 @@ public class CircleView extends View {
     }
 
     private int getTouchSectorPosition(double angle) {
-        if (mPieDataList == null || mPieDataList.size() == 0)
+        if (mAngleList == null || mAngleList.size() == 0)
             return -1;
         double totalAngle = 0;
-        for (int i = 0; i < mPieDataList.size(); i++) {
-            totalAngle = totalAngle + mPieDataList.get(i).getPercent() * 360;
+        for (int i = 0; i < mAngleList.size(); i++) {
+            totalAngle = totalAngle + mAngleList.get(i) * 360;
 
             if (totalAngle >= angle) {
                 Log.d(TAG, "getTouchSectorPosition: 点击了第" + i + "个扇形");
@@ -193,16 +216,61 @@ public class CircleView extends View {
         return -1;
     }
 
+    /**
+     * 获取圆的最底部Y轴坐标，没圆则返回-1
+     *
+     * @return
+     */
+    private float getCircleBottomY() {
+        if (mCircle == null || mCircle.radius <= 0) {
+            return -1;
+        }
+        return mCircle.y + mCircle.radius;
+    }
+
     public void setPieData(List<PieData> pieDataList) {
         if (pieDataList == mPieDataList) {
             return;
         }
         mPieDataList = pieDataList;
+        // 冒泡排序，从大到小
+        sort();
+        saveAngle();
         changeSmallAngle();
     }
 
-    public void setColors(int[] colors) {
-        mColors = colors;
+    public void setOnSelectedListener(PieChartView.OnSelectedListener onSelectedListener) {
+        mOnSelectedListener = onSelectedListener;
+    }
+
+    /**
+     * 冒泡排序，角度从大到小
+     */
+    private void sort() {
+        if (mPieDataList == null || mPieDataList.size() < 2) {
+            return;
+        }
+        for (int i = 0; i < mPieDataList.size(); i++) {
+            for (int j = mPieDataList.size() - 1; j > i; j--) {
+                if (mPieDataList.get(j).getPercent() > mPieDataList.get(j - 1).getPercent()) {
+                    PieData pieData = mPieDataList.get(j);
+                    mPieDataList.set(j, mPieDataList.get(j - 1));
+                    mPieDataList.set(j - 1, pieData);
+                }
+            }
+        }
+    }
+
+    /**
+     * 保存PieData的角度信息到一个新的List里，因为接下来要修改角度信息，避免修改掉原来的PieData数据。
+     */
+    private void saveAngle() {
+        mAngleList.clear();
+        if (mPieDataList != null) {
+            for (PieData pieData : mPieDataList) {
+                mAngleList.add(pieData.getPercent());
+            }
+        }
     }
 
     /**
@@ -213,23 +281,17 @@ public class CircleView extends View {
             return;
         }
         List<Integer> smallIndexList = new ArrayList<>();// 需要加大角度的扇形的列表
-        int bigestPieData = 0;// 最大的扇形的索引
-        int secondBigPieData = 1;// 第二大的扇形索引
+        int bigestPieDataIndex = 0;// 最大的扇形的索引
         float bigestPercent = mPieDataList.get(0).getPercent();// 最大的扇形的百分比
-        float secondBigestPercent = mPieDataList.get(1).getPercent();// 第二大的扇形的半分比
         for (int i = 0; i < mPieDataList.size(); i++) {
             PieData pieData = mPieDataList.get(i);
             if (pieData.getPercent() > bigestPercent) {
-                secondBigPieData = bigestPieData;
-                secondBigestPercent = bigestPercent;
-
-
                 bigestPercent = pieData.getPercent();
-                bigestPieData = i;
+                bigestPieDataIndex = i;
             }
             if (pieData.getPercent() <= 0.02) {// 0.02 为7.2度
                 if (i < mPieDataList.size() - 1) {
-                    if (mPieDataList.get(i + 1).getPercent() <= 0.02) {// 相邻两个扇形度数都小于7.2度
+                    if (mPieDataList.get(i + 1).getPercent() > 0 && mPieDataList.get(i + 1).getPercent() <= 0.02) {// 相邻两个扇形度数都小于7.2度
                         Log.d(TAG, "changeSmallAngle: 需要加大角度的扇形index：" + (i + 1));
                         smallIndexList.add(i + 1);
                         i++;
@@ -238,15 +300,44 @@ public class CircleView extends View {
             }
         }
         for (Integer smallIndex : smallIndexList) {// 给每个需要添加角度的扇形添加0.01的百分比
-            mPieDataList.get(smallIndex).setPercent(mPieDataList.get(smallIndex).getPercent() + 0.01f);
-            mPieDataList.get(bigestPieData).setPercent(mPieDataList.get(bigestPieData).getPercent() - 0.01f);
+            mAngleList.set(smallIndex, mPieDataList.get(smallIndex).getPercent() + 0.01f);
+            mAngleList.set(bigestPieDataIndex, mAngleList.get(bigestPieDataIndex) - 0.01f);
         }
-        Log.d(TAG, "changeSmallAngle: 最大的扇形的索引:" + bigestPieData);
-        Log.d(TAG, "changeSmallAngle: 第二大的扇形的索引:" + secondBigPieData);
+        Log.d(TAG, "changeSmallAngle: mAngleList=" + mAngleList.toString());
+        Log.d(TAG, "changeSmallAngle: 最大的扇形的索引:" + bigestPieDataIndex);
         Log.d(TAG, "changeSmallAngle: 最大的扇形的百分比:" + bigestPercent);
-        Log.d(TAG, "changeSmallAngle: 第二大的扇形的百分比:" + secondBigestPercent);
     }
 
+    public void setColors(List<Integer> colors) {
+        mColors = colors;
+    }
+
+    public void setDescriptionTextColor(int descriptionTextColor) {
+        this.descriptionTextColor = descriptionTextColor;
+    }
+
+    public void setCircleMargin(float circleMargin) {
+        this.circleMargin = circleMargin;
+    }
+
+    public void setPieDataTextSize(float pieDataTextSize) {
+        this.pieDataTextSize = pieDataTextSize;
+    }
+
+    /**
+     * 设置描述信息字体大小
+     */
+    public void setDescriptionTextSize(float textSize) {
+        descriptionTextSize = textSize;
+    }
+
+    public void setCenterTextSize(float centerTextSize) {
+        this.centerTextSize = centerTextSize;
+    }
+
+    public void setDescription(String descriptionText) {
+        this.descriptionText = descriptionText;
+    }
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -259,13 +350,14 @@ public class CircleView extends View {
             drawSector(canvas);
             drawLineAndText(canvas);
         }
+        // 画描述信息
+        drawDescriptionText(canvas);
     }
-
 
     private void drawCenterText(Canvas canvas, String text) {
         mBounds = new Rect();
         mPaint.setColor(getResources().getColor(R.color.textColor_noSetPieData));
-        mPaint.setTextSize(getResources().getDimension(R.dimen.textSize_noSetPieData));
+        mPaint.setTextSize(centerTextSize);
         mPaint.getTextBounds(text, 0, text.length(), mBounds);
         float textWidth = mBounds.width();
         float textHeight = mBounds.height();
@@ -276,6 +368,7 @@ public class CircleView extends View {
                 mPaint);
     }
 
+
     /**
      * 画扇形
      *
@@ -285,11 +378,10 @@ public class CircleView extends View {
         int dataSize = mPieDataList.size();
 
 
-        mPaint.setColor(Color.YELLOW);
-        int diameter = Math.min(getWidth(), getHeight()) - circleMargin;// 圆形的最大直径
+        float diameter = Math.min(getWidth(), getHeight()) - circleMargin;// 圆形的最大直径
         mCircle.x = getWidth() / 2;
         mCircle.y = getHeight() / 2;
-        mCircle.radius = diameter / 2;
+        mCircle.radius = (int) (diameter / 2);
         Log.i(TAG, "drawSector: 圆的圆心：x:" + mCircle.x + "  y:" + mCircle.y);
         Log.i(TAG, "drawSector: 圆的半径：" + mCircle.radius);
 
@@ -300,29 +392,52 @@ public class CircleView extends View {
             canvas.drawArc(rectF, 0, 360, false, mPaint);
             drawCenterText(canvas, "无数据");
         } else {
-            minRadius = mCircle.radius / 5;
-            gradient = (mCircle.radius - minRadius) / dataSize; // 梯度 = (最大半径-最小半径)/数据个数
-            gradient=0;
+            minRadius = mCircle.radius / 2;
+            gradient = (mCircle.radius - minRadius) / dataSize; // 半径梯度 = (最大半径-最小半径)/数据个数
             int color;
-            int startAngle = 0;
+            float startAngle = 0;
             for (int i = 0; i < dataSize; i++) {
-                if (mColors == null || mColors.length - 1 < i) {
+                if (mColors == null || mColors.size() - 1 < i) {
                     color = Color.LTGRAY;
                 } else {
-                    color = mColors[i];
+                    color = mColors.get(i);
                 }
                 mPaint.setColor(color);
                 // 按梯度减小半径
                 rectF = new RectF(mCircle.x - (mCircle.radius - gradient * i), mCircle.y - (mCircle.radius - gradient * i), mCircle.x + (mCircle.radius - gradient * i), mCircle.y + (mCircle.radius - gradient * i));
                 float angel;
-                if (i == mPieDataList.size() - 1) {// 最后一个扇形铺满
+                if (i == mPieDataList.size() - 1 && mAngleList.get(i) != 0) {// 最后一个扇形铺满
                     angel = 360 - startAngle;
                 } else {
-                    angel = 360 * mPieDataList.get(i).getPercent();
+                    angel = 360 * mAngleList.get(i);
                 }
                 canvas.drawArc(rectF, startAngle, angel, true, mPaint);
-                startAngle = (int) (startAngle + angel);
+                startAngle = startAngle + angel;
             }
+        }
+    }
+
+    private void drawDescriptionText(Canvas canvas) {
+        if (!TextUtils.isEmpty(descriptionText) && mPieDataList.size() > 0) {
+            // 先获取圆形的最低端、最低的pieDataText的位置
+            float circleBottomY = getCircleBottomY();
+            float textBottomestY = 0;// 最下面的文字的Y坐标
+            if (listTextPosition != null && listTextPosition.size() > 0) {
+                for (List<Float> list : listTextPosition) {
+                    if (list.get(3) > textBottomestY) {
+                        textBottomestY = list.get(3);
+                    }
+                }
+            }
+            float startY = Math.max(circleBottomY, textBottomestY);
+
+
+            mPaint.setColor(descriptionTextColor);
+            mPaint.setTextSize(descriptionTextSize);
+            Rect bound = new Rect();
+            mPaint.getTextBounds(descriptionText, 0, descriptionText.length(), bound);
+
+            canvas.drawText(descriptionText, getResources().getDimension(R.dimen.marginLeft_description), startY + bound.height() + getResources().getDimension(R.dimen.marginTop_description), mPaint);
         }
     }
 
@@ -332,7 +447,7 @@ public class CircleView extends View {
      * @param degrees
      * @return
      */
-    private double degrees2Radian(int degrees) {
+    private double degrees2Radian(double degrees) {
         return 2 * Math.PI / 360 * (degrees);
     }
 
@@ -343,36 +458,35 @@ public class CircleView extends View {
         listTextPosition.clear();
         if (mPieDataList == null || mPieDataList.size() == 0)
             return;
-        int baseAngle = 0;// 扇形开始角度
-        int src;
+        float basePercent = 0;// 每个扇形开始的百分比
         int mSlashLineLength = mCircle.radius + 30;// 斜线的长度(从圆心开始画)
-        mPaint.setTextSize(getResources().getDimension(R.dimen.textSize_pieDataName));
+        mPaint.setTextSize(pieDataTextSize);
         for (int i = 0; i < mPieDataList.size(); i++) {
             PieData pieData = mPieDataList.get(i);
-            src = canvas.save();
-            if (pieData.getPercent() <= 0) {
+            float percent = mAngleList.get(i);
+            if (percent <= 0) {
                 continue;
             }
             // 颜色
             int color;
-            if (mColors == null || mColors.length - 1 < i) {
+            if (mColors == null || mColors.size() - 1 < i) {
                 color = Color.LTGRAY;
             } else {
-                color = mColors[i];
+                color = mColors.get(i);
             }
             mPaint.setColor(color);
             //
-            int rotateAngle = (int) (baseAngle + pieData.getPercent() * 360 / 2); //斜线的角度
+            double rotateAngle = basePercent * 360 + percent * 360 / 2; //斜线的角度
             //刚好在坐标轴上的情况，画斜线会变成垂直水平的线  不好看  稍微偏移一下
             if (rotateAngle % 90 == 0) {
                 rotateAngle = rotateAngle + 3;
             }
-            int slashLineEndY = 0;
-            int slashLineEndX = 0;
+            float slashLineEndY = 0;
+            float slashLineEndX = 0;
             // 计算斜线终点坐标
             if (rotateAngle > 270 && rotateAngle < 360) {
-                slashLineEndY = (int) (mCircle.y - (Math.sin(degrees2Radian(360 - rotateAngle)) * mSlashLineLength));
-                slashLineEndX = (int) (Math.cos(degrees2Radian(360 - rotateAngle)) * mSlashLineLength + mCircle.x);
+                slashLineEndY = (float) (mCircle.y - (Math.sin(degrees2Radian(360 - rotateAngle)) * mSlashLineLength));
+                slashLineEndX = (float) (Math.cos(degrees2Radian(360 - rotateAngle)) * mSlashLineLength + mCircle.x);
             } else if (rotateAngle > 180 && rotateAngle < 270) {
                 slashLineEndY = (int) (mCircle.y - Math.sin(degrees2Radian(rotateAngle - 180)) * mSlashLineLength);
                 slashLineEndX = (int) (mCircle.x - Math.cos(degrees2Radian(rotateAngle - 180)) * mSlashLineLength);
@@ -383,8 +497,7 @@ public class CircleView extends View {
                 slashLineEndY = (int) (Math.sin(degrees2Radian(rotateAngle)) * mSlashLineLength + mCircle.y);
                 slashLineEndX = (int) (Math.cos(degrees2Radian(rotateAngle)) * mSlashLineLength + mCircle.x);
             }
-//            canvas.rotate(rotateAngle, mCircle.x, mCircle.y);
-            //
+            mPaint.setStrokeWidth(3);
             canvas.drawLine(mCircle.x, mCircle.y, slashLineEndX, slashLineEndY, mPaint);        //画斜线
 
             // 获取字体宽度和高度
@@ -394,9 +507,9 @@ public class CircleView extends View {
             int textWidth = mBounds.width();
             int textHeight = mBounds.height();
             //
-            int horizonLineEndX;
-            int textStartY;
-            int textStartX;
+            float horizonLineEndX;
+            float textStartY;
+            float textStartX;
             //画水平直线时要考虑在左边还是右边，两边起点和终点是有区别的
             if (rotateAngle > 90 && rotateAngle < 270) {// 在左边
                 horizonLineEndX = slashLineEndX - textWidth;
@@ -421,9 +534,9 @@ public class CircleView extends View {
             }
             canvas.drawText(pieData.getName(), textStartX, textStartY, mPaint);
             // 保存字体左上右下位置
-            saveTextPosition(textStartX, textStartX + textWidth, textStartY - textHeight, textStartY);
+            saveTextPosition(textStartX, textStartX + textWidth, (textStartY - textHeight), textStartY);
             // 累加角度
-            baseAngle += (pieData.getPercent() * 360);
+            basePercent += percent;
         }
     }
 
@@ -433,8 +546,8 @@ public class CircleView extends View {
      * @param tY 上边的Y坐标
      * @param bY 下边的Y坐标
      */
-    private void saveTextPosition(int lX, int rX, int tY, int bY) {
-        List<Integer> list = new ArrayList<>();
+    private void saveTextPosition(float lX, float rX, float tY, float bY) {
+        List<Float> list = new ArrayList<>();
         list.add(lX);
         list.add(rX);
         list.add(tY);
@@ -453,7 +566,7 @@ public class CircleView extends View {
         if (isShowLabel && mPieDataList != null) {
             //TODO
 //            labelHeight = mPieDataList.size() * 50;
-            labelHeight =0;
+            labelHeight = 0;
         }
         // 3.最后计算饼形图的最大可用高度 = 父控件高度或者宽度 - 标签高度 - margin
         int circleMaxHeight = Math.min(parentWidth, parentHeight) - labelHeight - PieChartView.marginBetween;

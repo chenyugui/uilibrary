@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--topBar-->
     <dimen name="titleTextSize">6sp</dimen>
-    <dimen name="textSize_noSetPieData">18sp</dimen>
-    <dimen name="textSize_pieDataName">14sp</dimen>
+
+    <!--饼状图-->
+    <dimen name="margin_pieChartNormal">200dp</dimen>
+    <dimen name="marginLeft_description">14dp</dimen>
+    <dimen name="marginTop_description">20dp</dimen>
+    <dimen name="textSize_pieData">14sp</dimen>
+    <dimen name="textSize_pieChartCenterText">18sp</dimen>
+    <dimen name="textSize_pieDataName">12sp</dimen>
+    <dimen name="textSize_description">18sp</dimen>
 </resources>

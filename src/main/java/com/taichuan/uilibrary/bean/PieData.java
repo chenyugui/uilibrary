@@ -9,10 +9,16 @@ public class PieData {
     private String name;
     private float percent;
 
+    /**
+     * PieData在list中的索引
+     */
+    private int index;
 
-    public PieData(String name, float percent) {
+
+    public PieData(String name, float percent, int index) {
         this.name = name;
         this.percent = percent;
+        this.index = index;
     }
 
     public String getName() {
@@ -29,5 +35,13 @@ public class PieData {
 
     public void setPercent(float percent) {
         this.percent = percent;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 }

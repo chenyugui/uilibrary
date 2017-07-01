@@ -2,7 +2,7 @@ uilibrary
 ==========================================================
 实现一些比较通用的android UI组件
 
-### com.taichuan.uilibrary.loadmoreview
+## com.taichuan.uilibrary.loadmoreview
 加载更多的组件<br>
 
 
@@ -81,4 +81,16 @@ setOnScrollListener(ListScrollListener listScrollListener)
 
 
 
-
+## PieChartView（自定义饼状图）
+-   使用：
+    +   像普通View一样使用即可，setPieData是必须设置的，否则无数据显示。
+    +   其他api根据需要调用。
+-   可用API：
+	+   ```pieChart.setColors(colors);// 设置扇形颜色值```
+	+   ```pieChart.setCircleMargin(getResources().getDimension(R.dimen.margin_pieChart));// 设置饼状图圆形四周的间距```
+	+   ```pieChart.setCenterTextSize(xxx);// 设置中间文字大小```
+	+   ```pieChart.setPieDataTextSize(200);// 设置横线文字大小```
+	+   ```pieChart.setDescription(description);// 设置描述文字```
+	+   ```pieChart.setDescriptionTextColor(xxx);// 设置描述信息文字颜色```
+	+   ```pieChart.setOnSelectedListener(xxx)// 设置饼状图扇形选择事件监听```
+	+   ```pieChart.setPieData(pieDataList);// 设置饼状图扇形数据集合,要比以上API晚调用```

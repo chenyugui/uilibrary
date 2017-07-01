@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="textColor_noSetPieData">#F0AB4E</color>
+    <color name="textColor_description">#F0AB4E</color>
 </resources>

@@ -25,13 +25,15 @@ public class PieChartView extends ViewGroup {
      * 点击某个扇形时，扇形的增加的半径
      */
     private int expandRadius;
-    /**
-     * 圆形最大半径
-     */
-    private int circleMaxHeight;
+    public static int marginBetween = 0;
+
 
     private CircleView mCircleView;
     private LabelView mLabelView;
+
+    public interface OnSelectedListener {
+        void onSelected(PieData pieData);
+    }
 
     public PieChartView(Context context) {
         super(context);
@@ -60,24 +62,54 @@ public class PieChartView extends ViewGroup {
         mPieDataList = pieDataList;
         mCircleView.setPieData(pieDataList);
         mLabelView.setPieData(pieDataList);
+
+        for (int i = 0; i < getChildCount(); i++) {
+            getChildAt(i).invalidate();
+        }
         invalidate();
     }
 
-    public void setColors(int[] colors) {
+
+    public void setColors(List<Integer> colors) {
         mCircleView.setColors(colors);
     }
 
-    public static final int marginBetween = 0;
+    public void setDescriptionTextColor(int color) {
+        mCircleView.setDescriptionTextColor(color);
+    }
+
+    public void setOnSelectedListener(OnSelectedListener onSelectedListener) {
+        mCircleView.setOnSelectedListener(onSelectedListener);
+    }
+
+    public void setCircleMargin(float circleMargin) {
+        mCircleView.setCircleMargin(circleMargin);
+    }
+
+    public void setPieDataTextSize(float pieDataTextSize) {
+        mCircleView.setPieDataTextSize(pieDataTextSize);
+    }
+
+    /**
+     * 设置描述信息字体大小
+     */
+    public void setDescriptionTextSize(float textSize) {
+        mCircleView.setDescriptionTextSize(textSize);
+    }
+
+    public void setCenterTextSize(float centerTextSize) {
+        mCircleView.setCenterTextSize(centerTextSize);
+    }
+
+    public void setDescription(String text) {
+        mCircleView.setDescription(text);
+    }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         Log.d("TAGTAG", "onLayout");
-
-
         mCircleView.layout(0, 0, mCircleView.getMeasuredWidth(), mCircleView.getMeasuredHeight());
         int circleHeight = mCircleView.getMeasuredHeight();
-
-
         int labelWidth = mLabelView.getMeasuredWidth();
         int labelHeight = mLabelView.getMeasuredHeight();
 
