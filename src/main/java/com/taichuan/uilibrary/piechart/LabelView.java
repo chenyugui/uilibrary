@@ -5,8 +5,6 @@ import android.graphics.Color;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 
-import com.taichuan.uilibrary.bean.PieData;
-
 import java.util.List;
 
 /**

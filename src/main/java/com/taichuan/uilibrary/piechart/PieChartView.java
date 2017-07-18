@@ -6,8 +6,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ViewGroup;
 
-import com.taichuan.uilibrary.bean.PieData;
-
 import java.util.List;
 
 /**

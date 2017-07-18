@@ -15,12 +15,15 @@ import java.util.ArrayList;
 
 /**
  * Created by gui on 2017/7/18.
- * AVLoadingDialog工具
+ * AVLoadingDialog工具 <br><br>
+ * 使用showLoading显示dialog <br>
+ * 使用stopLoading关闭dialog <br>
+ * 使用setDefault可以配置默认样式等<br>
  */
 public class AVLoadingUtil {
     private static final String TAG = "AVLoadingUtil";
     private static final ArrayList<Dialog> LOADERS = new ArrayList<>();// dialogList集合，方便stopLoading时关闭所有Dialog
-    public static Enum<LoadingStyle> defaultStyle = LoadingStyle.BallBeatIndicator;// 默认样式
+    private static Enum<LoadingStyle> defaultStyle = LoadingStyle.BallBeatIndicator;// 默认样式
     public static boolean default_cancelable = true;//
     private static final int DEFAULT_SCALE = 7;// 屏幕宽高/dialog的宽高的倍数
     private static final Object lock = new Object();
@@ -41,6 +44,7 @@ public class AVLoadingUtil {
         showLoading(context, defaultStyle, cancelable);
     }
 
+    @SuppressWarnings("unused")
     public static void showLoading(Context context, Enum<LoadingStyle> loaderStyleEnum) {
         showLoading(context, loaderStyleEnum.name(), default_cancelable);
     }

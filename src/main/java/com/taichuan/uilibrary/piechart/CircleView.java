@@ -15,7 +15,6 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.taichuan.uilibrary.R;
-import com.taichuan.uilibrary.bean.PieData;
 
 import java.util.ArrayList;
 import java.util.List;

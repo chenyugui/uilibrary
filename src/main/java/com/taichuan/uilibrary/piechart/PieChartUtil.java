@@ -3,8 +3,6 @@ package com.taichuan.uilibrary.piechart;
 import android.graphics.Paint;
 import android.graphics.Rect;
 
-import com.taichuan.uilibrary.bean.PieData;
-
 import java.util.List;
 
 /**

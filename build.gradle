@@ -33,7 +33,6 @@ dependencies {
     compile project(':utils')
     // 字体图标库
     compile 'com.joanzapata.iconify:android-iconify-fontawesome:2.2.2' // (v4.5)
-    //AVLoader依赖
+    //AVLoader （https://github.com/81813780/AVLoadingIndicatorView）
     compile 'com.wang.avi:library:2.1.3'
-
 }
