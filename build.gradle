@@ -29,7 +29,11 @@ dependencies {
     testCompile 'junit:junit:4.12'
 
     compile "com.android.support:recyclerview-v7:${SUPPORT_LIBRARY}"
+    // 依赖utils module
+    compile project(':utils')
     // 字体图标库
     compile 'com.joanzapata.iconify:android-iconify-fontawesome:2.2.2' // (v4.5)
+    //AVLoader依赖
+    compile 'com.wang.avi:library:2.1.3'
 
 }
