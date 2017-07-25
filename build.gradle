@@ -27,7 +27,7 @@ dependencies {
     })
     compile "com.android.support:appcompat-v7:${SUPPORT_LIBRARY}"
     testCompile 'junit:junit:4.12'
-
+    // recyclerview
     compile "com.android.support:recyclerview-v7:${SUPPORT_LIBRARY}"
     // 依赖utils module
     compile project(':utils')
